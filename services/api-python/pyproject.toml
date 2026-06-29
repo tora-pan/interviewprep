@@ -3,13 +3,20 @@ name = "interviewprep-api-python"
 version = "0.1.0"
 description = "InterviewPrep FastAPI service"
 readme = "../../README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 dependencies = [
+    "alembic>=1.18.5",
+    "email-validator>=2.3.0",
     "fastapi>=0.138.2",
     "jinja2>=3.1.6",
+    "psycopg>=3.3.4",
+    "pwdlib>=0.3.0",
+    "pydantic-settings>=2.14.2",
+    "python-jose[cryptography]>=3.5.0",
     "rich>=15.0.0",
     "sqlalchemy>=2.0.51",
     "typer>=0.26.8",
+    "uvicorn[standard]>=0.49.0",
 ]
 
 [dependency-groups]
@@ -19,7 +26,7 @@ dev = [
 ]
 
 [tool.mypy]
-python_version = "3.14"
+python_version = "3.12"
 mypy_path = ["src"]
 files = ["main.py", "src"]
 explicit_package_bases = true
