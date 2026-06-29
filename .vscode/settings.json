@@ -1,0 +1,8 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/services/api-python/.venv/bin/python",
+  "mypy-type-checker.cwd": "${workspaceFolder}/services/api-python",
+  "mypy-type-checker.args": [
+    "--config-file",
+    "${workspaceFolder}/services/api-python/pyproject.toml"
+  ]
+}

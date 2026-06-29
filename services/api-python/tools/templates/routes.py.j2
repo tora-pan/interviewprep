@@ -1,0 +1,11 @@
+from fastapi import APIRouter
+
+router = APIRouter(
+    prefix="/{{ module_name }}",
+    tags=["{{ module_name }}"],
+)
+
+
+@router.get("/")
+def root():
+    return {"message": "{{ module_name }} working"}
