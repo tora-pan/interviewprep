@@ -288,3 +288,8 @@ Additional features will be implemented incrementally as the architecture mature
 # License
 
 License information will be added once the project reaches a stable public release.
+
+### Quick Notes:
+*using alembic basic steps*
+`uv run alembic -c alembic.ini upgrade head`
+`uv run alembic -c alembic.ini revision --autogenerate -m "describe_change"`

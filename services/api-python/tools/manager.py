@@ -31,7 +31,7 @@ def create_module(name: str):
     module_name = name.lower()
     class_name = name.capitalize()
 
-    module_path = SRC_DIR / "modules" / module_name
+    module_path = SRC_DIR / "interviewprep_api" / "modules" / module_name
 
     if module_path.exists():
         print(f"[red]Module '{module_name}' already exists[/red]")
@@ -52,7 +52,7 @@ def create_module(name: str):
 
     print("[bold]Next step:[/bold]")
     print(f"""
-from src.modules.{module_name}.routes import router as {module_name}_router
+from interviewprep_api.modules.{module_name}.routes import router as {module_name}_router
 
 app.include_router({module_name}_router)
 """)
