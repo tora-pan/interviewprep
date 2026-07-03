@@ -1,6 +1,16 @@
 import { Outlet } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthUser } from "../hooks/useAuth";
 
 export default function Layout() {
+  const navigate = useNavigate();
+  const { isAuthenticated, userEmail, logout } = useAuthUser();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       {/* TOP NAV */}
@@ -20,9 +30,30 @@ export default function Layout() {
             </a>
           </nav>
 
-          <button className="px-4 py-2 rounded-lg bg-cyan-500 text-black font-medium hover:bg-cyan-400">
-            Sign in
-          </button>
+          {isAuthenticated && userEmail ? (
+            <div className="flex items-center gap-3">
+              <p
+                title={userEmail}
+                className="px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-cyan-300 text-sm font-medium max-w-56 truncate"
+              >
+                {userEmail}
+              </p>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="px-3 py-2 rounded-lg border border-slate-700 text-slate-300 text-sm hover:text-white hover:border-slate-500"
+              >
+                Log out
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/signin"
+              className="px-4 py-2 rounded-lg bg-cyan-500 text-black font-medium hover:bg-cyan-400"
+            >
+              Sign in
+            </Link>
+          )}
         </div>
       </header>
 
