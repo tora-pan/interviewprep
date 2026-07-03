@@ -1,8 +1,20 @@
 {
   "python.defaultInterpreterPath": "${workspaceFolder}/services/api-python/.venv/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/services/api-python/src"
+  ],
   "mypy-type-checker.cwd": "${workspaceFolder}/services/api-python",
+  "mypy-type-checker.path": [
+    "${workspaceFolder}/services/api-python/.venv/bin/mypy"
+  ],
   "mypy-type-checker.args": [
     "--config-file",
     "${workspaceFolder}/services/api-python/pyproject.toml"
+  ],
+  "black-formatter.path": [
+    "${workspaceFolder}/services/api-python/.venv/bin/black"
+  ],
+  "isort.path": [
+    "${workspaceFolder}/services/api-python/.venv/bin/isort"
   ]
 }
