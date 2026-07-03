@@ -1,9 +1,6 @@
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String, Integer
-
-
-class Base(DeclarativeBase):
-    pass
+from sqlalchemy import Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
+from interviewprep_api.db.base import Base
 
 
 class User(Base):
