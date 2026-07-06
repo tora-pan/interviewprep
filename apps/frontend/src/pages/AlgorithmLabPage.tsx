@@ -2,6 +2,65 @@ import { useState } from "react";
 import { AlgorithmPlayer } from "../components/AlgorithmPlayer";
 import { type Graph } from "../types/graph";
 
+const useCases: Record<"bfs" | "dfs", string[]> = {
+  bfs: [
+    "Find the shortest path in an unweighted graph.",
+    "Explore nodes level-by-level (minimum number of edges).",
+    "Solve nearest-target problems (nearest exit, nearest resource).",
+    "Use in multi-source expansion or wavefront-style traversals.",
+  ],
+  dfs: [
+    "Explore all possibilities deeply before backtracking.",
+    "Use for topological patterns and cycle detection.",
+    "Great for connected components and island-style problems.",
+    "Use in recursion/backtracking tasks (paths, subsets, trees).",
+  ],
+};
+
+type PracticeLink = {
+  title: string;
+  href: string;
+};
+
+const leetcodePractice: Record<"bfs" | "dfs", PracticeLink[]> = {
+  bfs: [
+    {
+      title: "102. Binary Tree Level Order Traversal",
+      href: "https://leetcode.com/problems/binary-tree-level-order-traversal/",
+    },
+    {
+      title: "994. Rotting Oranges",
+      href: "https://leetcode.com/problems/rotting-oranges/",
+    },
+    {
+      title: "127. Word Ladder",
+      href: "https://leetcode.com/problems/word-ladder/",
+    },
+    {
+      title: "542. 01 Matrix",
+      href: "https://leetcode.com/problems/01-matrix/",
+    },
+  ],
+  dfs: [
+    {
+      title: "200. Number of Islands",
+      href: "https://leetcode.com/problems/number-of-islands/",
+    },
+    {
+      title: "695. Max Area of Island",
+      href: "https://leetcode.com/problems/max-area-of-island/",
+    },
+    {
+      title: "797. All Paths From Source to Target",
+      href: "https://leetcode.com/problems/all-paths-from-source-to-target/",
+    },
+    {
+      title: "207. Course Schedule",
+      href: "https://leetcode.com/problems/course-schedule/",
+    },
+  ],
+};
+
 const sampleGraph: Graph = {
   nodes: [
     { id: "A", x: 300, y: 50 },
@@ -105,13 +164,35 @@ export default function AlgorithmLabPage() {
           </div>
 
           <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-            <h3 className="font-semibold text-cyan-400">How it works</h3>
+            <h3 className="font-semibold text-cyan-400">
+              When to use {algorithm.toUpperCase()}
+            </h3>
 
             <ul className="mt-3 text-sm text-slate-300 space-y-2">
-              <li>• Each algorithm produces a timeline of steps</li>
-              <li>• Steps are replayed frame-by-frame</li>
-              <li>• Renderer stays completely generic</li>
-              <li>• Same engine works for all algorithms</li>
+              {useCases[algorithm].map((item) => (
+                <li key={item}>• {item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+            <h3 className="font-semibold text-cyan-400">
+              LeetCode practice ({algorithm.toUpperCase()})
+            </h3>
+
+            <ul className="mt-3 text-sm text-slate-300 space-y-2">
+              {leetcodePractice[algorithm].map((problem) => (
+                <li key={problem.href}>
+                  <a
+                    href={problem.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-slate-200 hover:text-cyan-300 underline underline-offset-2"
+                  >
+                    {problem.title}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
