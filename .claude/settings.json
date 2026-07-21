@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(find *)",
+      "Bash(pwd)",
+      "Bash(cd apps/frontend && pnpm install)",
+      "Bash(cd apps/frontend && pnpm dev)",
+      "Bash(cd apps/frontend && pnpm build)",
+      "Bash(cd apps/frontend && pnpm lint)",
+      "Bash(cd services/api-python && uv sync)",
+      "Bash(cd services/api-python && uv run uvicorn interviewprep_api.main:app --reload)",
+      "Bash(cd services/api-python && uv run alembic -c alembic.ini upgrade head)",
+      "Bash(cd services/api-python && uv run ruff check .)",
+      "Bash(cd services/api-python && uv run mypy)",
+      "Bash(docker compose up --build)",
+      "Bash(docker compose down)",
+      "Read(*)",
+      "Edit(*)",
+      "MultiEdit(*)",
+      "Write(*)",
+      "Glob(*)",
+      "Grep(*)"
+    ],
+    "deny": [
+      "Bash(git reset --hard *)",
+      "Bash(git checkout -- *)",
+      "Bash(git clean -fd *)",
+      "Bash(rm -rf *)"
+    ]
+  }
+}
