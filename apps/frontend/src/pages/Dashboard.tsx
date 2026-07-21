@@ -1,243 +1,256 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { Stage, Layer, Circle, Line, Text } from "react-konva";
+import { Link } from "react-router-dom";
+import { useAuthUser } from "../hooks/useAuth";
+import { useApplications } from "../hooks/useApplications";
+import { useLeetcodeProblems } from "../hooks/useLeetcode";
+import type { ApplicationStatus } from "../api/applications";
+import type { LeetcodeStatus, LeetcodeDifficulty } from "../api/leetcode";
 
-type Graph = {
-  nodes: { id: string; x: number; y: number }[];
-  edges: { from: string; to: string }[];
+type StatCardProps = {
+  label: string;
+  value: number | string;
+  color: string;
 };
 
-type Step =
-  | { type: "start"; node: string }
-  | { type: "visit"; node: string }
-  | { type: "enqueue"; from: string; to: string }
-  | { type: "edge"; from: string; to: string }
-  | { type: "done" };
-
-/**
- * BFS with richer steps (better for narration)
- */
-function bfsSteps(graph: Graph, start: string): Step[] {
-  const steps: Step[] = [];
-
-  const adj: Record<string, string[]> = {};
-  graph.nodes.forEach((n) => (adj[n.id] = []));
-  graph.edges.forEach((e) => adj[e.from].push(e.to));
-
-  const queue: string[] = [start];
-  const visited = new Set<string>();
-
-  steps.push({ type: "start", node: start });
-
-  while (queue.length) {
-    const node = queue.shift()!;
-    if (visited.has(node)) continue;
-
-    visited.add(node);
-    steps.push({ type: "visit", node });
-
-    for (const neighbor of adj[node]) {
-      steps.push({ type: "edge", from: node, to: neighbor });
-      if (!visited.has(neighbor)) {
-        steps.push({ type: "enqueue", from: node, to: neighbor });
-        queue.push(neighbor);
-      }
-    }
-  }
-
-  steps.push({ type: "done" });
-
-  return steps;
-}
-
-/**
- * Balanced tree graph
- */
-const sampleGraph: Graph = {
-  nodes: [
-    { id: "A", x: 300, y: 50 },
-
-    { id: "B", x: 150, y: 130 },
-    { id: "C", x: 450, y: 130 },
-
-    { id: "D", x: 75, y: 220 },
-    { id: "E", x: 225, y: 220 },
-    { id: "F", x: 375, y: 220 },
-    { id: "G", x: 525, y: 220 },
-
-    { id: "H", x: 37, y: 320 },
-    { id: "I", x: 112, y: 320 },
-    { id: "J", x: 187, y: 320 },
-    { id: "K", x: 262, y: 320 },
-    { id: "L", x: 337, y: 320 },
-    { id: "M", x: 412, y: 320 },
-    { id: "N", x: 487, y: 320 },
-    { id: "O", x: 562, y: 320 },
-  ],
-  edges: [
-    { from: "A", to: "B" },
-    { from: "A", to: "C" },
-
-    { from: "B", to: "D" },
-    { from: "B", to: "E" },
-    { from: "C", to: "F" },
-    { from: "C", to: "G" },
-
-    { from: "D", to: "H" },
-    { from: "D", to: "I" },
-    { from: "E", to: "J" },
-    { from: "E", to: "K" },
-    { from: "F", to: "L" },
-    { from: "F", to: "M" },
-    { from: "G", to: "N" },
-    { from: "G", to: "O" },
-  ],
-};
-
-export default function BFSVisualizer() {
-  const steps = useMemo(() => bfsSteps(sampleGraph, "A"), []);
-
-  const [index, setIndex] = useState(0);
-  const [playing, setPlaying] = useState(false);
-
-  useEffect(() => {
-    if (!playing) return;
-
-    const id = setInterval(() => {
-      setIndex((i) => Math.min(i + 1, steps.length - 1));
-    }, 700);
-
-    return () => clearInterval(id);
-  }, [playing, steps.length]);
-
-  /**
-   * visited nodes
-   */
-  const visited = useMemo(() => {
-    const set = new Set<string>();
-
-    for (let i = 0; i <= index; i++) {
-      const step = steps[i];
-      if (step.type === "visit") set.add(step.node);
-    }
-
-    return set;
-  }, [index, steps]);
-
-  /**
-   * active edge highlight
-   */
-  const activeEdge = steps[index];
-
-  /**
-   * 👇 STEP NARRATION (this is the new part)
-   */
-  const narration = useMemo(() => {
-    const step = steps[index];
-
-    switch (step.type) {
-      case "start":
-        return `Starting BFS at node ${step.node}. We initialize the queue.`;
-
-      case "visit":
-        return `Visiting node ${step.node}. Marking it as visited.`;
-
-      case "edge":
-        return `Inspecting edge ${step.from} → ${step.to}. Checking if ${step.to} should be explored.`;
-
-      case "enqueue":
-        return `Adding ${step.to} to the queue from ${step.from}.`;
-
-      case "done":
-        return `BFS complete. All reachable nodes have been explored.`;
-
-      default:
-        return "";
-    }
-  }, [index, steps]);
-
+function StatCard({ label, value, color }: StatCardProps) {
   return (
-    <div>
-      {/* Controls */}
-      <div style={{ marginBottom: 10 }}>
-        <button onClick={() => setPlaying((p) => !p)}>
-          {playing ? "Pause" : "Play"}
-        </button>
-
-        <button onClick={() => setIndex((i) => Math.max(i - 1, 0))}>
-          Step Back
-        </button>
-
-        <button
-          onClick={() => setIndex((i) => Math.min(i + 1, steps.length - 1))}
-        >
-          Step Forward
-        </button>
-      </div>
-
-      {/* 🔥 NARRATION PANEL */}
-      <div
-        style={{
-          marginBottom: 10,
-          padding: 12,
-          background: "#111",
-          color: "#fff",
-          borderRadius: 8,
-          fontFamily: "monospace",
-        }}
-      >
-        {narration}
-      </div>
-
-      {/* CANVAS */}
-      <Stage width={600} height={400}>
-        <Layer>
-          {/* edges */}
-          {sampleGraph.edges.map((e, idx) => {
-            const from = sampleGraph.nodes.find((n) => n.id === e.from)!;
-            const to = sampleGraph.nodes.find((n) => n.id === e.to)!;
-
-            const isActive =
-              activeEdge.type === "edge" &&
-              activeEdge.from === e.from &&
-              activeEdge.to === e.to;
-
-            return (
-              <Line
-                key={idx}
-                points={[from.x, from.y, to.x, to.y]}
-                stroke={isActive ? "orange" : "#999"}
-                strokeWidth={isActive ? 4 : 2}
-              />
-            );
-          })}
-
-          {/* nodes */}
-          {sampleGraph.nodes.map((n) => {
-            const isVisited = visited.has(n.id);
-
-            return (
-              <React.Fragment key={n.id}>
-                <Circle
-                  x={n.x}
-                  y={n.y}
-                  radius={20}
-                  fill={isVisited ? "#4ade80" : "#e5e7eb"}
-                  stroke="#333"
-                  strokeWidth={2}
-                />
-
-                <Text x={n.x - 5} y={n.y - 7} text={n.id} fontSize={14} />
-              </React.Fragment>
-            );
-          })}
-        </Layer>
-      </Stage>
-
-      {/* Step indicator */}
-      <div style={{ marginTop: 10 }}>
-        Step {index} / {steps.length - 1}
-      </div>
+    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+      <p className="text-xs uppercase tracking-wide text-slate-500">{label}</p>
+      <p className={`text-4xl font-bold mt-2 ${color}`}>{value}</p>
     </div>
   );
 }
 
+const appStatusChip: Record<ApplicationStatus, string> = {
+  applied: "bg-blue-500/20 text-blue-300 border border-blue-500/30",
+  interviewing: "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
+  offer: "bg-green-500/20 text-green-300 border border-green-500/30",
+  rejected: "bg-red-500/20 text-red-300 border border-red-500/30",
+};
+
+const lcStatusChip: Record<LeetcodeStatus, string> = {
+  completed: "bg-green-500/20 text-green-300 border border-green-500/30",
+  practiced: "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30",
+  needs_review: "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
+  too_hard: "bg-red-500/20 text-red-300 border border-red-500/30",
+};
+
+const difficultyBadge: Record<LeetcodeDifficulty, string> = {
+  easy: "bg-green-500/20 text-green-400",
+  medium: "bg-yellow-500/20 text-yellow-400",
+  hard: "bg-red-500/20 text-red-400",
+};
+
+export default function Dashboard() {
+  const { userEmail } = useAuthUser();
+  const { data: applications, isLoading: appsLoading } = useApplications();
+  const { data: leetcode, isLoading: lcLoading } = useLeetcodeProblems();
+
+  const totalApps = applications?.length ?? 0;
+  const activeApps =
+    applications?.filter(
+      (a) => a.status === "applied" || a.status === "interviewing",
+    ).length ?? 0;
+  const offersApps =
+    applications?.filter((a) => a.status === "offer").length ?? 0;
+  const rejectedApps =
+    applications?.filter((a) => a.status === "rejected").length ?? 0;
+
+  const totalLC = leetcode?.length ?? 0;
+  const completedLC =
+    leetcode?.filter((p) => p.status === "completed").length ?? 0;
+  const needsReviewLC =
+    leetcode?.filter((p) => p.status === "needs_review").length ?? 0;
+  const tooHardLC =
+    leetcode?.filter((p) => p.status === "too_hard").length ?? 0;
+
+  const recentApps = [...(applications ?? [])]
+    .sort((a, b) => b.date_applied.localeCompare(a.date_applied))
+    .slice(0, 5);
+
+  const recentLC = [...(leetcode ?? [])]
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .slice(0, 5);
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-white px-6 py-8 max-w-7xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white">
+          Welcome back <span className="text-cyan-400">{userEmail}</span>
+        </h1>
+        <p className="text-slate-400 mt-1">
+          Here's your interview prep overview.
+        </p>
+      </div>
+
+      <div className="mb-3">
+        <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">
+          Applications
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <StatCard
+            label="Total Applications"
+            value={appsLoading ? "—" : totalApps}
+            color="text-white"
+          />
+          <StatCard
+            label="Active"
+            value={appsLoading ? "—" : activeApps}
+            color="text-cyan-400"
+          />
+          <StatCard
+            label="Offers"
+            value={appsLoading ? "—" : offersApps}
+            color="text-green-400"
+          />
+          <StatCard
+            label="Rejected"
+            value={appsLoading ? "—" : rejectedApps}
+            color="text-red-400"
+          />
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <p className="text-xs uppercase tracking-wide text-slate-500 mb-3">
+          LeetCode
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard
+            label="Total Problems"
+            value={lcLoading ? "—" : totalLC}
+            color="text-white"
+          />
+          <StatCard
+            label="Completed"
+            value={lcLoading ? "—" : completedLC}
+            color="text-green-400"
+          />
+          <StatCard
+            label="Needs Review"
+            value={lcLoading ? "—" : needsReviewLC}
+            color="text-yellow-400"
+          />
+          <StatCard
+            label="Too Hard"
+            value={lcLoading ? "—" : tooHardLC}
+            color="text-red-400"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="font-semibold text-white">Recent Applications</h2>
+            <Link
+              to="/application-tracker"
+              className="text-sm text-cyan-400 hover:text-cyan-300"
+            >
+              View all →
+            </Link>
+          </div>
+          {appsLoading ? (
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-10 bg-slate-800 rounded animate-pulse"
+                />
+              ))}
+            </div>
+          ) : recentApps.length === 0 ? (
+            <p className="text-slate-400 text-sm">
+              No applications yet.{" "}
+              <Link
+                to="/application-tracker"
+                className="text-cyan-400 hover:text-cyan-300"
+              >
+                Add one →
+              </Link>
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {recentApps.map((app) => (
+                <div key={app.id} className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-slate-100 font-medium">
+                      {app.company}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {app.role} · {app.date_applied}
+                    </p>
+                  </div>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full ${appStatusChip[app.status]}`}
+                  >
+                    {app.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="font-semibold text-white">Recent LeetCode</h2>
+            <Link
+              to="/leetcode"
+              className="text-sm text-cyan-400 hover:text-cyan-300"
+            >
+              View all →
+            </Link>
+          </div>
+          {lcLoading ? (
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-10 bg-slate-800 rounded animate-pulse"
+                />
+              ))}
+            </div>
+          ) : recentLC.length === 0 ? (
+            <p className="text-slate-400 text-sm">
+              No problems logged yet.{" "}
+              <Link
+                to="/leetcode"
+                className="text-cyan-400 hover:text-cyan-300"
+              >
+                Add one →
+              </Link>
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {recentLC.map((prob) => (
+                <div
+                  key={prob.id}
+                  className="flex items-center justify-between gap-2"
+                >
+                  <p className="text-sm text-slate-100 font-medium truncate">
+                    {prob.problem_number != null
+                      ? `#${prob.problem_number} `
+                      : ""}
+                    {prob.title}
+                  </p>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded ${difficultyBadge[prob.difficulty]}`}
+                    >
+                      {prob.difficulty}
+                    </span>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full ${lcStatusChip[prob.status]}`}
+                    >
+                      {prob.status.replace("_", " ")}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

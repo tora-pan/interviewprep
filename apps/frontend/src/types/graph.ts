@@ -7,6 +7,7 @@ export type GraphNode = {
 export type GraphEdge = {
   from: string;
   to: string;
+  weight?: number;
 };
 
 export type Graph = {

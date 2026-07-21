@@ -9,6 +9,7 @@ import AppLayout from "./components/AppLayout";
 import AlgorithmLabPage from "./pages/AlgorithmLabPage";
 import DataStructuresPage from "./pages/DataStructuresPage";
 import ApplicationTrackerPage from "./pages/ApplicationTrackerPage";
+import LeetcodePage from "./pages/LeetcodePage";
 import { useAuthUser } from "./hooks/useAuth";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -69,6 +70,7 @@ export default function App() {
           path="/application-tracker"
           element={<ApplicationTrackerPage />}
         />
+        <Route path="/leetcode" element={<LeetcodePage />} />
       </Route>
 
       {/* 404 fallback */}

@@ -31,6 +31,9 @@ export default function AppLayout() {
               <Link to="/application-tracker" className="hover:text-white">
                 Application Tracker
               </Link>
+              <Link to="/leetcode" className="hover:text-white">
+                LeetCode
+              </Link>
             </nav>
           </div>
 

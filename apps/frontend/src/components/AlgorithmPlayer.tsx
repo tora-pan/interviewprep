@@ -18,7 +18,8 @@ function describeStep(step: Step | undefined, algorithm: "bfs" | "dfs") {
 
   switch (step.type) {
     case "init": {
-      const start = step.payload?.start ?? "?";
+      const start =
+        (step.payload as { start?: string } | undefined)?.start ?? "?";
       return `Starting ${algorithm.toUpperCase()} at node ${start}.`;
     }
     case "queue_pop":
@@ -60,10 +61,14 @@ export function AlgorithmPlayer({ graph, algorithm, startNode }: Props) {
         index={playback.index}
         setIndex={playback.setIndex}
         stepsLength={steps.length}
+        speed={playback.speed}
+        setSpeed={playback.setSpeed}
       />
 
       <div className="mt-4 rounded-lg border border-slate-700 bg-slate-950 p-4">
-        <p className="text-xs uppercase tracking-wide text-slate-500">Step narration</p>
+        <p className="text-xs uppercase tracking-wide text-slate-500">
+          Step narration
+        </p>
         <p className="mt-2 text-slate-100">{narration}</p>
         <p className="mt-2 text-xs text-slate-400">
           Step {playback.index + 1} of {steps.length}
